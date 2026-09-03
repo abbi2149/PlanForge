@@ -1,0 +1,28 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../capacity"
+    },
+    {
+      "path": "../costing"
+    },
+    {
+      "path": "../inventory"
+    },
+    {
+      "path": "../model"
+    },
+    {
+      "path": "../scheduler"
+    }
+  ]
+}

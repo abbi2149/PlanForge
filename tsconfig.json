@@ -1,0 +1,233 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/allocation"
+    },
+    {
+      "path": "./packages/analytics"
+    },
+    {
+      "path": "./packages/api"
+    },
+    {
+      "path": "./packages/audit"
+    },
+    {
+      "path": "./packages/batch"
+    },
+    {
+      "path": "./packages/bom"
+    },
+    {
+      "path": "./packages/bottleneck"
+    },
+    {
+      "path": "./packages/calendar"
+    },
+    {
+      "path": "./packages/capacity"
+    },
+    {
+      "path": "./packages/changeover"
+    },
+    {
+      "path": "./packages/cli"
+    },
+    {
+      "path": "./packages/compliance"
+    },
+    {
+      "path": "./packages/constraints"
+    },
+    {
+      "path": "./packages/cost-center"
+    },
+    {
+      "path": "./packages/costing"
+    },
+    {
+      "path": "./packages/cycle-time"
+    },
+    {
+      "path": "./packages/delivery-window"
+    },
+    {
+      "path": "./packages/demand"
+    },
+    {
+      "path": "./packages/dispatch"
+    },
+    {
+      "path": "./packages/downtime"
+    },
+    {
+      "path": "./packages/due-date"
+    },
+    {
+      "path": "./packages/energy"
+    },
+    {
+      "path": "./packages/flow"
+    },
+    {
+      "path": "./packages/forecasting"
+    },
+    {
+      "path": "./packages/inventory"
+    },
+    {
+      "path": "./packages/inventory-policy"
+    },
+    {
+      "path": "./packages/inventory-turns"
+    },
+    {
+      "path": "./packages/kanban"
+    },
+    {
+      "path": "./packages/labor-cost"
+    },
+    {
+      "path": "./packages/leadtime"
+    },
+    {
+      "path": "./packages/lean"
+    },
+    {
+      "path": "./packages/line-balance"
+    },
+    {
+      "path": "./packages/machine-health"
+    },
+    {
+      "path": "./packages/maintenance"
+    },
+    {
+      "path": "./packages/material-yield"
+    },
+    {
+      "path": "./packages/model"
+    },
+    {
+      "path": "./packages/oee"
+    },
+    {
+      "path": "./packages/optimization"
+    },
+    {
+      "path": "./packages/order-mix"
+    },
+    {
+      "path": "./packages/orders"
+    },
+    {
+      "path": "./packages/packaging"
+    },
+    {
+      "path": "./packages/planning"
+    },
+    {
+      "path": "./packages/portfolio"
+    },
+    {
+      "path": "./packages/procurement"
+    },
+    {
+      "path": "./packages/profitability"
+    },
+    {
+      "path": "./packages/promise"
+    },
+    {
+      "path": "./packages/quality"
+    },
+    {
+      "path": "./packages/release"
+    },
+    {
+      "path": "./packages/replenishment"
+    },
+    {
+      "path": "./packages/reporting"
+    },
+    {
+      "path": "./packages/resilience"
+    },
+    {
+      "path": "./packages/resource-pool"
+    },
+    {
+      "path": "./packages/result-store"
+    },
+    {
+      "path": "./packages/rework-planning"
+    },
+    {
+      "path": "./packages/risk"
+    },
+    {
+      "path": "./packages/routing"
+    },
+    {
+      "path": "./packages/scenario"
+    },
+    {
+      "path": "./packages/scheduler"
+    },
+    {
+      "path": "./packages/scrap"
+    },
+    {
+      "path": "./packages/sequencing"
+    },
+    {
+      "path": "./packages/service-level"
+    },
+    {
+      "path": "./packages/setup-cost"
+    },
+    {
+      "path": "./packages/shipping"
+    },
+    {
+      "path": "./packages/simulation"
+    },
+    {
+      "path": "./packages/sla"
+    },
+    {
+      "path": "./packages/supplier"
+    },
+    {
+      "path": "./packages/takt"
+    },
+    {
+      "path": "./packages/throughput"
+    },
+    {
+      "path": "./packages/traceability"
+    },
+    {
+      "path": "./packages/value-stream"
+    },
+    {
+      "path": "./packages/variance"
+    },
+    {
+      "path": "./packages/warehousing"
+    },
+    {
+      "path": "./packages/wip"
+    },
+    {
+      "path": "./packages/work-order"
+    },
+    {
+      "path": "./packages/workforce"
+    },
+    {
+      "path": "./packages/workload"
+    }
+  ]
+}

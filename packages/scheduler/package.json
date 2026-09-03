@@ -1,0 +1,23 @@
+{
+  "name": "@planforge/scheduler",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@planforge/model": "0.1.0",
+    "@planforge/calendar": "0.1.0",
+    "@planforge/routing": "0.1.0",
+    "@planforge/capacity": "0.1.0"
+  }
+}

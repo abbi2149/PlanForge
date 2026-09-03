@@ -1,0 +1,255 @@
+{
+  "compilerOptions": {
+    "target": "ES2024",
+    "lib": [
+      "ES2024"
+    ],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@planforge/allocation": [
+        "packages/allocation/src/index.ts"
+      ],
+      "@planforge/analytics": [
+        "packages/analytics/src/index.ts"
+      ],
+      "@planforge/api": [
+        "packages/api/src/index.ts"
+      ],
+      "@planforge/audit": [
+        "packages/audit/src/index.ts"
+      ],
+      "@planforge/batch": [
+        "packages/batch/src/index.ts"
+      ],
+      "@planforge/bom": [
+        "packages/bom/src/index.ts"
+      ],
+      "@planforge/bottleneck": [
+        "packages/bottleneck/src/index.ts"
+      ],
+      "@planforge/calendar": [
+        "packages/calendar/src/index.ts"
+      ],
+      "@planforge/capacity": [
+        "packages/capacity/src/index.ts"
+      ],
+      "@planforge/changeover": [
+        "packages/changeover/src/index.ts"
+      ],
+      "@planforge/cli": [
+        "packages/cli/src/index.ts"
+      ],
+      "@planforge/compliance": [
+        "packages/compliance/src/index.ts"
+      ],
+      "@planforge/constraints": [
+        "packages/constraints/src/index.ts"
+      ],
+      "@planforge/cost-center": [
+        "packages/cost-center/src/index.ts"
+      ],
+      "@planforge/costing": [
+        "packages/costing/src/index.ts"
+      ],
+      "@planforge/cycle-time": [
+        "packages/cycle-time/src/index.ts"
+      ],
+      "@planforge/delivery-window": [
+        "packages/delivery-window/src/index.ts"
+      ],
+      "@planforge/demand": [
+        "packages/demand/src/index.ts"
+      ],
+      "@planforge/dispatch": [
+        "packages/dispatch/src/index.ts"
+      ],
+      "@planforge/downtime": [
+        "packages/downtime/src/index.ts"
+      ],
+      "@planforge/due-date": [
+        "packages/due-date/src/index.ts"
+      ],
+      "@planforge/energy": [
+        "packages/energy/src/index.ts"
+      ],
+      "@planforge/flow": [
+        "packages/flow/src/index.ts"
+      ],
+      "@planforge/forecasting": [
+        "packages/forecasting/src/index.ts"
+      ],
+      "@planforge/inventory": [
+        "packages/inventory/src/index.ts"
+      ],
+      "@planforge/inventory-policy": [
+        "packages/inventory-policy/src/index.ts"
+      ],
+      "@planforge/inventory-turns": [
+        "packages/inventory-turns/src/index.ts"
+      ],
+      "@planforge/kanban": [
+        "packages/kanban/src/index.ts"
+      ],
+      "@planforge/labor-cost": [
+        "packages/labor-cost/src/index.ts"
+      ],
+      "@planforge/leadtime": [
+        "packages/leadtime/src/index.ts"
+      ],
+      "@planforge/lean": [
+        "packages/lean/src/index.ts"
+      ],
+      "@planforge/line-balance": [
+        "packages/line-balance/src/index.ts"
+      ],
+      "@planforge/machine-health": [
+        "packages/machine-health/src/index.ts"
+      ],
+      "@planforge/maintenance": [
+        "packages/maintenance/src/index.ts"
+      ],
+      "@planforge/material-yield": [
+        "packages/material-yield/src/index.ts"
+      ],
+      "@planforge/model": [
+        "packages/model/src/index.ts"
+      ],
+      "@planforge/oee": [
+        "packages/oee/src/index.ts"
+      ],
+      "@planforge/optimization": [
+        "packages/optimization/src/index.ts"
+      ],
+      "@planforge/order-mix": [
+        "packages/order-mix/src/index.ts"
+      ],
+      "@planforge/orders": [
+        "packages/orders/src/index.ts"
+      ],
+      "@planforge/packaging": [
+        "packages/packaging/src/index.ts"
+      ],
+      "@planforge/planning": [
+        "packages/planning/src/index.ts"
+      ],
+      "@planforge/portfolio": [
+        "packages/portfolio/src/index.ts"
+      ],
+      "@planforge/procurement": [
+        "packages/procurement/src/index.ts"
+      ],
+      "@planforge/profitability": [
+        "packages/profitability/src/index.ts"
+      ],
+      "@planforge/promise": [
+        "packages/promise/src/index.ts"
+      ],
+      "@planforge/quality": [
+        "packages/quality/src/index.ts"
+      ],
+      "@planforge/release": [
+        "packages/release/src/index.ts"
+      ],
+      "@planforge/replenishment": [
+        "packages/replenishment/src/index.ts"
+      ],
+      "@planforge/reporting": [
+        "packages/reporting/src/index.ts"
+      ],
+      "@planforge/resilience": [
+        "packages/resilience/src/index.ts"
+      ],
+      "@planforge/resource-pool": [
+        "packages/resource-pool/src/index.ts"
+      ],
+      "@planforge/result-store": [
+        "packages/result-store/src/index.ts"
+      ],
+      "@planforge/rework-planning": [
+        "packages/rework-planning/src/index.ts"
+      ],
+      "@planforge/risk": [
+        "packages/risk/src/index.ts"
+      ],
+      "@planforge/routing": [
+        "packages/routing/src/index.ts"
+      ],
+      "@planforge/scenario": [
+        "packages/scenario/src/index.ts"
+      ],
+      "@planforge/scheduler": [
+        "packages/scheduler/src/index.ts"
+      ],
+      "@planforge/scrap": [
+        "packages/scrap/src/index.ts"
+      ],
+      "@planforge/sequencing": [
+        "packages/sequencing/src/index.ts"
+      ],
+      "@planforge/service-level": [
+        "packages/service-level/src/index.ts"
+      ],
+      "@planforge/setup-cost": [
+        "packages/setup-cost/src/index.ts"
+      ],
+      "@planforge/shipping": [
+        "packages/shipping/src/index.ts"
+      ],
+      "@planforge/simulation": [
+        "packages/simulation/src/index.ts"
+      ],
+      "@planforge/sla": [
+        "packages/sla/src/index.ts"
+      ],
+      "@planforge/supplier": [
+        "packages/supplier/src/index.ts"
+      ],
+      "@planforge/takt": [
+        "packages/takt/src/index.ts"
+      ],
+      "@planforge/throughput": [
+        "packages/throughput/src/index.ts"
+      ],
+      "@planforge/traceability": [
+        "packages/traceability/src/index.ts"
+      ],
+      "@planforge/value-stream": [
+        "packages/value-stream/src/index.ts"
+      ],
+      "@planforge/variance": [
+        "packages/variance/src/index.ts"
+      ],
+      "@planforge/warehousing": [
+        "packages/warehousing/src/index.ts"
+      ],
+      "@planforge/wip": [
+        "packages/wip/src/index.ts"
+      ],
+      "@planforge/work-order": [
+        "packages/work-order/src/index.ts"
+      ],
+      "@planforge/workforce": [
+        "packages/workforce/src/index.ts"
+      ],
+      "@planforge/workload": [
+        "packages/workload/src/index.ts"
+      ]
+    }
+  }
+}

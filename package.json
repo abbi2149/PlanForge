@@ -1,0 +1,35 @@
+{
+  "name": "planforge-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deterministic finite-capacity manufacturing planning, scenario analysis, and production simulation",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "check:workspaces": "node scripts/check-workspaces.mjs",
+    "stats": "node scripts/package-stats.mjs",
+    "link:workspaces": "node scripts/link-workspaces.mjs",
+    "typecheck": "node scripts/link-workspaces.mjs && tsc -b tsconfig.json --pretty false",
+    "build": "node scripts/link-workspaces.mjs && tsc -b tsconfig.json --pretty false",
+    "test": "npm run build && node --test test/*.test.mjs packages/*/test/*.test.mjs",
+    "verify": "npm run clean && npm run check:workspaces && npm run typecheck && npm test",
+    "example": "npm run build && node examples/factory-plan.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.32.0",
+    "@types/node": "24.2.0",
+    "eslint": "9.32.0",
+    "prettier": "3.6.2",
+    "typescript": "5.9.2",
+    "typescript-eslint": "8.39.0"
+  },
+  "bin": {
+    "planforge": "./bin/planforge.mjs"
+  }
+}
