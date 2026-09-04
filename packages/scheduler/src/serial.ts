@@ -25,7 +25,10 @@ export function scheduleSerial(input: ScheduleInput): ModelResult<ScheduleResult
       if (!placed.ok) return placed;
       ledger = placed.value.ledger;
       operations.push(placed.value.operation);
-      completionByOrder.set(order.id, placed.value.operation.endMinute);
+      completionByOrder.set(
+        order.id,
+        Math.max(completionByOrder.get(order.id) ?? 0, placed.value.operation.endMinute) as Minute,
+      );
     }
     if ((completionByOrder.get(order.id) ?? order.releaseMinute) > order.dueMinute) warnings.push(`order ${order.id} completes late`);
   }
