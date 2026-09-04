@@ -25,6 +25,9 @@
       "path": "../costing"
     },
     {
+      "path": "../critical-path"
+    },
+    {
       "path": "../dispatch"
     },
     {

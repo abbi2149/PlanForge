@@ -47,6 +47,9 @@
       "path": "./packages/costing"
     },
     {
+      "path": "./packages/critical-path"
+    },
+    {
       "path": "./packages/cycle-time"
     },
     {

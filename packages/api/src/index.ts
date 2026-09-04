@@ -1,5 +1,6 @@
 export * from './analyze.js';
 export * from './compile.js';
+export * from './explain.js';
 export * from './types.js';
 export * from './portfolio.js';
 export * from './validate.js';
@@ -9,6 +10,7 @@ export * from '@planforge/bom';
 export * from '@planforge/calendar';
 export * from '@planforge/capacity';
 export * from '@planforge/costing';
+export * from '@planforge/critical-path';
 export * from '@planforge/dispatch';
 export * from '@planforge/forecasting';
 export * from '@planforge/inventory';

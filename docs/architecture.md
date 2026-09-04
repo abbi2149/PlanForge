@@ -22,7 +22,9 @@ The scheduler is deliberately serial and deterministic. Dispatch policy influenc
 
 ## Layer 4: analysis
 
-Simulation, resilience, risk, analytics, OEE, service-level, profitability, value-stream, traceability, reporting, and related packages consume plans and domain facts to produce derived metrics. They should not mutate their inputs.
+Simulation, resilience, risk, analytics, critical-path, OEE, service-level, profitability, value-stream, traceability, reporting, and related packages consume plans and domain facts to produce derived metrics. They should not mutate their inputs.
+
+`critical-path` is the explanatory member of this layer: it traces the chain of operations that determined each order's completion and attributes every minute of flow time to processing, a closed calendar, contention with another order, or idle waiting. See [delay-attribution.md](delay-attribution.md).
 
 ## Layer 5: application boundary
 

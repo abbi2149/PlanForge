@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 import { readFile, writeFile } from 'node:fs/promises';
-import { analyzeFactory, compileFactory, validateFactoryModel } from '../packages/api/dist/index.js';
+import {
+  analyzeFactory,
+  compileFactory,
+  explainFactoryDelays,
+  explainOrderDelay,
+  validateFactoryModel,
+} from '../packages/api/dist/index.js';
 import { CLI_HELP, formatCliResult, formatDiagnostics, parseCliArguments } from '../packages/cli/dist/index.js';
 
 const parsed = parseCliArguments(process.argv.slice(2));
@@ -21,9 +27,17 @@ if (!parsed.ok) {
         includeReport: true,
       });
       if (!compiled.ok) throw new Error(formatDiagnostics(compiled.diagnostics));
-      output = parsed.value.command === 'compile'
-        ? compiled.value
-        : { ...compiled.value, analysis: analyzeFactory(model, compiled.value.plan) };
+      if (parsed.value.command === 'compile') {
+        output = compiled.value;
+      } else if (parsed.value.command === 'analyze') {
+        output = { ...compiled.value, analysis: analyzeFactory(model, compiled.value.plan) };
+      } else {
+        const explained = parsed.value.orderId
+          ? explainOrderDelay(model, compiled.value.plan, parsed.value.orderId)
+          : explainFactoryDelays(model, compiled.value.plan);
+        if (!explained.ok) throw new Error(formatDiagnostics(explained.diagnostics));
+        output = { plan: { name: compiled.value.plan.name, digest: compiled.value.plan.digest }, explanation: explained.value };
+      }
     }
     const text = formatCliResult(output, parsed.value.pretty);
     if (parsed.value.outputPath) await writeFile(parsed.value.outputPath, text, 'utf8');

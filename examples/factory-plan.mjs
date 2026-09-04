@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { analyzeFactory, compileFactory } from '../packages/api/dist/index.js';
+import { analyzeFactory, compileFactory, explainFactoryDelays } from '../packages/api/dist/index.js';
 
 const factory = JSON.parse(await readFile(new URL('./factory.json', import.meta.url), 'utf8'));
 const compiled = compileFactory(factory, { validateMaterials: true, includeReport: false });
@@ -12,5 +12,6 @@ if (!compiled.ok) {
     plan: compiled.value.plan,
     materialCostMinor: compiled.value.materialCostMinor,
     analysis: analyzeFactory(factory, compiled.value.plan),
+    delays: explainFactoryDelays(factory, compiled.value.plan).value,
   }, null, 2));
 }

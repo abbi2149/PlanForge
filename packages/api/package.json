@@ -32,6 +32,7 @@
     "@planforge/dispatch": "0.1.0",
     "@planforge/audit": "0.1.0",
     "@planforge/reporting": "0.1.0",
-    "@planforge/result-store": "0.1.0"
+    "@planforge/result-store": "0.1.0",
+    "@planforge/critical-path": "0.1.0"
   }
 }

@@ -67,6 +67,9 @@
       "@planforge/costing": [
         "packages/costing/src/index.ts"
       ],
+      "@planforge/critical-path": [
+        "packages/critical-path/src/index.ts"
+      ],
       "@planforge/cycle-time": [
         "packages/cycle-time/src/index.ts"
       ],
