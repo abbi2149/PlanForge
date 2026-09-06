@@ -1,4 +1,12 @@
-import type { Diagnostic } from '@planforge/api';
+import {
+  reportToCsv,
+  reportToJson,
+  reportToMarkdown,
+  type Diagnostic,
+  type FactoryAnalysis,
+  type ProductionReport,
+} from '@planforge/api';
+import type { CliFormat } from './types.js';
 
 export function formatDiagnostics(diagnostics: readonly Diagnostic[]): string {
   return diagnostics
@@ -8,4 +16,31 @@ export function formatDiagnostics(diagnostics: readonly Diagnostic[]): string {
 
 export function formatCliResult(value: unknown, pretty: boolean): string {
   return pretty ? `${JSON.stringify(value, null, 2)}\n` : `${JSON.stringify(value)}\n`;
+}
+
+/** Renders a plan report in the format requested by `--format`. */
+export function formatPlanReport(report: ProductionReport, format: CliFormat, pretty: boolean): string {
+  if (format === 'csv') return reportToCsv(report);
+  if (format === 'markdown') return reportToMarkdown(report);
+  return reportToJson(report, pretty);
+}
+
+/** Appends schedule metrics and bottlenecks so `analyze` keeps its findings in non-JSON output. */
+export function withAnalysisSection(report: ProductionReport, analysis: FactoryAnalysis): ProductionReport {
+  return {
+    ...report,
+    sections: [
+      ...report.sections,
+      {
+        title: 'Analysis',
+        rows: [
+          {
+            ...analysis.schedule,
+            bottlenecks: analysis.bottlenecks.join(' '),
+            maintenanceConflicts: analysis.maintenanceConflicts,
+          },
+        ],
+      },
+    ],
+  };
 }

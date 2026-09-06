@@ -1,5 +1,8 @@
 export type CliCommand = 'validate' | 'compile' | 'analyze' | 'explain';
 
+/** Rendering of the command result. `csv` and `markdown` need a plan report. */
+export type CliFormat = 'json' | 'csv' | 'markdown';
+
 export interface CliRunOptions {
   readonly command: CliCommand;
   readonly inputPath: string;
@@ -7,6 +10,7 @@ export interface CliRunOptions {
   readonly dispatchRule?: 'priority' | 'earliest-due' | 'shortest-processing' | 'critical-ratio';
   /** Restricts `explain` to a single order id. */
   readonly orderId?: string;
+  readonly format: CliFormat;
   readonly pretty: boolean;
 }
 

@@ -7,7 +7,14 @@ import {
   explainOrderDelay,
   validateFactoryModel,
 } from '../packages/api/dist/index.js';
-import { CLI_HELP, formatCliResult, formatDiagnostics, parseCliArguments } from '../packages/cli/dist/index.js';
+import {
+  CLI_HELP,
+  formatCliResult,
+  formatDiagnostics,
+  formatPlanReport,
+  parseCliArguments,
+  withAnalysisSection,
+} from '../packages/cli/dist/index.js';
 
 async function planforgeVersion() {
   const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
@@ -26,6 +33,7 @@ if (!parsed.ok) {
   try {
     const model = JSON.parse(await readFile(parsed.value.inputPath, 'utf8'));
     let output;
+    let report;
     if (parsed.value.command === 'validate') {
       const result = validateFactoryModel(model);
       if (!result.ok) throw new Error(formatDiagnostics(result.diagnostics));
@@ -38,8 +46,11 @@ if (!parsed.ok) {
       if (!compiled.ok) throw new Error(formatDiagnostics(compiled.diagnostics));
       if (parsed.value.command === 'compile') {
         output = compiled.value;
+        report = compiled.value.report;
       } else if (parsed.value.command === 'analyze') {
-        output = { ...compiled.value, analysis: analyzeFactory(model, compiled.value.plan) };
+        const analysis = analyzeFactory(model, compiled.value.plan);
+        output = { ...compiled.value, analysis };
+        report = withAnalysisSection(compiled.value.report, analysis);
       } else {
         const explained = parsed.value.orderId
           ? explainOrderDelay(model, compiled.value.plan, parsed.value.orderId)
@@ -48,7 +59,10 @@ if (!parsed.ok) {
         output = { plan: { name: compiled.value.plan.name, digest: compiled.value.plan.digest }, explanation: explained.value };
       }
     }
-    const text = formatCliResult(output, parsed.value.pretty);
+    const text =
+      parsed.value.format === 'json'
+        ? formatCliResult(output, parsed.value.pretty)
+        : formatPlanReport(report, parsed.value.format, parsed.value.pretty);
     if (parsed.value.outputPath) await writeFile(parsed.value.outputPath, text, 'utf8');
     else process.stdout.write(text);
   } catch (error) {

@@ -127,6 +127,13 @@ node bin/planforge.mjs explain examples/factory.json --order ORD-2
 
 Use `--compact` for single-line JSON and `--output <file>` to write the result to disk.
 
+Render the plan report as CSV or Markdown instead of JSON:
+
+```bash
+node bin/planforge.mjs compile examples/factory.json --format csv
+node bin/planforge.mjs analyze examples/factory.json --format markdown
+```
+
 Print usage or the installed version at any time:
 
 ```bash

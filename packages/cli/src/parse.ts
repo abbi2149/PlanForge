@@ -1,8 +1,10 @@
 import { failure, success, type ModelResult } from '@planforge/api';
-import type { CliOptions, CliRunOptions } from './types.js';
+import type { CliFormat, CliOptions, CliRunOptions } from './types.js';
 
 const commands = new Set(['validate', 'compile', 'analyze', 'explain']);
 const rules = new Set(['priority', 'earliest-due', 'shortest-processing', 'critical-ratio']);
+const formats = new Set(['json', 'csv', 'markdown']);
+const reportCommands = new Set(['compile', 'analyze']);
 const helpAliases = new Set(['help', '--help', '-h']);
 const versionAliases = new Set(['version', '--version', '-v']);
 
@@ -20,6 +22,7 @@ export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptio
   let outputPath: string | undefined;
   let orderId: string | undefined;
   let dispatchRule: CliRunOptions['dispatchRule'];
+  let format: CliFormat = 'json';
   let pretty = true;
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index]!;
@@ -30,6 +33,12 @@ export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptio
       const value = args[++index];
       if (!value || !rules.has(value)) return failure({ code: 'CLI_ARGUMENT', message: '--dispatch has an invalid rule' });
       dispatchRule = value as CliRunOptions['dispatchRule'];
+    } else if (arg === '--format') {
+      const value = args[++index];
+      if (!value || !formats.has(value)) {
+        return failure({ code: 'CLI_ARGUMENT', message: '--format must be json, csv, or markdown' });
+      }
+      format = value as CliFormat;
     } else if (arg === '--order') {
       orderId = args[++index];
       if (!orderId) return failure({ code: 'CLI_ARGUMENT', message: '--order requires an order id' });
@@ -48,9 +57,13 @@ export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptio
   if (orderId !== undefined && command !== 'explain') {
     return failure({ code: 'CLI_ARGUMENT', message: '--order is only valid for explain' });
   }
+  if (format !== 'json' && !reportCommands.has(command)) {
+    return failure({ code: 'CLI_ARGUMENT', message: `--format ${format} is only valid for compile and analyze` });
+  }
   return success({
     command,
     inputPath,
+    format,
     pretty,
     ...(outputPath === undefined ? {} : { outputPath }),
     ...(dispatchRule === undefined ? {} : { dispatchRule }),

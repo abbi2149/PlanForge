@@ -110,3 +110,56 @@ test('CLI prints the workspace version', async () => {
   const { stdout } = await exec(process.execPath, ['bin/planforge.mjs', '--version'], { cwd: process.cwd() });
   assert.equal(stdout, `planforge ${manifest.version}\n`);
 });
+
+test('CLI analyze renders Markdown including the analysis section', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'planforge-test-'));
+  try {
+    const input = path.join(root, 'factory.json');
+    await writeFile(input, JSON.stringify(factoryFixture()), 'utf8');
+    const { stdout } = await exec(
+      process.execPath,
+      ['bin/planforge.mjs', 'analyze', input, '--format', 'markdown'],
+      { cwd: process.cwd() },
+    );
+    assert.match(stdout, /^# Production plan North Cell/);
+    assert.match(stdout, /## Analysis/);
+    assert.match(stdout, /makespan/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('CLI compile can write a CSV report to a file', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'planforge-test-'));
+  try {
+    const input = path.join(root, 'factory.json');
+    const output = path.join(root, 'plan.csv');
+    await writeFile(input, JSON.stringify(factoryFixture()), 'utf8');
+    await exec(process.execPath, ['bin/planforge.mjs', 'compile', input, '--format', 'csv', '--output', output], {
+      cwd: process.cwd(),
+    });
+    const lines = (await readFile(output, 'utf8')).trimEnd().split('\n');
+    assert.equal(lines[0].split(',')[0], 'section');
+    assert.ok(lines.some((line) => line.startsWith('Operations,')));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('CLI rejects a report format for explain', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'planforge-test-'));
+  try {
+    const input = path.join(root, 'factory.json');
+    await writeFile(input, JSON.stringify(factoryFixture()), 'utf8');
+    await assert.rejects(
+      exec(process.execPath, ['bin/planforge.mjs', 'explain', input, '--format', 'csv'], { cwd: process.cwd() }),
+      (error) => {
+        assert.equal(error.code, 2);
+        assert.match(error.stderr, /only valid for compile and analyze/);
+        return true;
+      },
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

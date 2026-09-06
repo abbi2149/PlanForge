@@ -2,8 +2,8 @@ export const CLI_HELP = `PlanForge
 
 Usage:
   planforge validate <factory.json>
-  planforge compile <factory.json> [--dispatch <rule>] [--output <file>] [--compact]
-  planforge analyze <factory.json> [--dispatch <rule>] [--output <file>] [--compact]
+  planforge compile <factory.json> [--dispatch <rule>] [--format <format>] [--output <file>] [--compact]
+  planforge analyze <factory.json> [--dispatch <rule>] [--format <format>] [--output <file>] [--compact]
   planforge explain <factory.json> [--order <id>] [--dispatch <rule>] [--output <file>] [--compact]
   planforge help
   planforge version
@@ -17,6 +17,11 @@ Dispatch rules:
   earliest-due
   shortest-processing
   critical-ratio
+
+Output formats (compile and analyze only, default json):
+  json                  the full command result
+  csv                   the plan report as one CSV document
+  markdown              the plan report as a Markdown document
 
 Explain attributes every minute of an order's flow time to one of:
   processing            work running on the critical chain
