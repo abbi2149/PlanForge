@@ -195,3 +195,80 @@ test('CLI compare without --against exits with a usage diagnostic', async () => 
     },
   );
 });
+
+test('CLI compile passes strict material validation when stock covers demand', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'planforge-test-'));
+  try {
+    const input = path.join(root, 'factory.json');
+    await writeFile(input, JSON.stringify(factoryFixture()), 'utf8');
+    const { stdout } = await exec(
+      process.execPath,
+      ['bin/planforge.mjs', 'compile', input, '--strict-materials', '--compact'],
+      { cwd: process.cwd() },
+    );
+    assert.deepEqual(JSON.parse(stdout).materialShortages, []);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('CLI compile fails under --strict-materials when a component runs short', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'planforge-test-'));
+  try {
+    const fixture = factoryFixture();
+    const short = { ...fixture, inventoryLots: [{ ...fixture.inventoryLots[0], quantity: 1 }] };
+    const input = path.join(root, 'factory.json');
+    await writeFile(input, JSON.stringify(short), 'utf8');
+
+    const { stdout } = await exec(process.execPath, ['bin/planforge.mjs', 'compile', input, '--compact'], {
+      cwd: process.cwd(),
+    });
+    assert.deepEqual(JSON.parse(stdout).materialShortages, ['RM-10']);
+
+    await assert.rejects(
+      exec(process.execPath, ['bin/planforge.mjs', 'compile', input, '--strict-materials'], { cwd: process.cwd() }),
+      (error) => {
+        assert.equal(error.code, 1);
+        assert.match(error.stderr, /API_MATERIAL_SHORTAGE/);
+        return true;
+      },
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('CLI reports a missing input file without a raw runtime error', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'planforge-test-'));
+  try {
+    await assert.rejects(
+      exec(process.execPath, ['bin/planforge.mjs', 'validate', path.join(root, 'absent.json')], { cwd: process.cwd() }),
+      (error) => {
+        assert.equal(error.code, 2);
+        assert.match(error.stderr, /CLI_INPUT_READ: input cannot be read/);
+        assert.match(error.stderr, /absent\.json/);
+        return true;
+      },
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('CLI reports malformed input JSON with the offending path', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'planforge-test-'));
+  try {
+    const input = path.join(root, 'factory.json');
+    await writeFile(input, '{ "name": "North Cell",', 'utf8');
+    await assert.rejects(
+      exec(process.execPath, ['bin/planforge.mjs', 'compile', input], { cwd: process.cwd() }),
+      (error) => {
+        assert.equal(error.code, 2);
+        assert.match(error.stderr, /CLI_INPUT_JSON: input is not valid JSON/);
+        return true;
+      },
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

@@ -13,6 +13,7 @@ import {
   formatCliResult,
   formatDiagnostics,
   formatPlanReport,
+  inputFileDiagnostic,
   parseCliArguments,
   withAnalysisSection,
 } from '../packages/cli/dist/index.js';
@@ -20,6 +21,14 @@ import {
 async function planforgeVersion() {
   const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
   return manifest.version;
+}
+
+async function readModel(inputPath) {
+  try {
+    return { ok: true, value: JSON.parse(await readFile(inputPath, 'utf8')) };
+  } catch (error) {
+    return { ok: false, diagnostics: [inputFileDiagnostic(inputPath, error)] };
+  }
 }
 
 const parsed = parseCliArguments(process.argv.slice(2));
@@ -31,51 +40,58 @@ if (!parsed.ok) {
 } else if (parsed.value.command === 'version') {
   process.stdout.write(`planforge ${await planforgeVersion()}\n`);
 } else {
-  try {
-    const model = JSON.parse(await readFile(parsed.value.inputPath, 'utf8'));
-    let output;
-    let report;
-    if (parsed.value.command === 'validate') {
-      const result = validateFactoryModel(model);
-      if (!result.ok) throw new Error(formatDiagnostics(result.diagnostics));
-      output = { ok: true, name: result.value.name };
-    } else if (parsed.value.command === 'compare') {
-      const compared = compareFactoryDispatchRules(
-        model,
-        parsed.value.dispatchRule ?? 'priority',
-        parsed.value.againstRule,
-      );
-      if (!compared.ok) throw new Error(formatDiagnostics(compared.diagnostics));
-      output = { comparison: compared.value };
-    } else {
-      const compiled = compileFactory(model, {
-        ...(parsed.value.dispatchRule ? { dispatchRule: parsed.value.dispatchRule } : {}),
-        includeReport: true,
-      });
-      if (!compiled.ok) throw new Error(formatDiagnostics(compiled.diagnostics));
-      if (parsed.value.command === 'compile') {
-        output = compiled.value;
-        report = compiled.value.report;
-      } else if (parsed.value.command === 'analyze') {
-        const analysis = analyzeFactory(model, compiled.value.plan);
-        output = { ...compiled.value, analysis };
-        report = withAnalysisSection(compiled.value.report, analysis);
+  const loaded = await readModel(parsed.value.inputPath);
+  if (!loaded.ok) {
+    process.stderr.write(`${formatDiagnostics(loaded.diagnostics)}\n`);
+    process.exitCode = 2;
+  } else {
+    try {
+      const model = loaded.value;
+      let output;
+      let report;
+      if (parsed.value.command === 'validate') {
+        const result = validateFactoryModel(model);
+        if (!result.ok) throw new Error(formatDiagnostics(result.diagnostics));
+        output = { ok: true, name: result.value.name };
+      } else if (parsed.value.command === 'compare') {
+        const compared = compareFactoryDispatchRules(
+          model,
+          parsed.value.dispatchRule ?? 'priority',
+          parsed.value.againstRule,
+        );
+        if (!compared.ok) throw new Error(formatDiagnostics(compared.diagnostics));
+        output = { comparison: compared.value };
       } else {
-        const explained = parsed.value.orderId
-          ? explainOrderDelay(model, compiled.value.plan, parsed.value.orderId)
-          : explainFactoryDelays(model, compiled.value.plan);
-        if (!explained.ok) throw new Error(formatDiagnostics(explained.diagnostics));
-        output = { plan: { name: compiled.value.plan.name, digest: compiled.value.plan.digest }, explanation: explained.value };
+        const compiled = compileFactory(model, {
+          ...(parsed.value.dispatchRule ? { dispatchRule: parsed.value.dispatchRule } : {}),
+          ...(parsed.value.strictMaterials ? { validateMaterials: true } : {}),
+          includeReport: true,
+        });
+        if (!compiled.ok) throw new Error(formatDiagnostics(compiled.diagnostics));
+        if (parsed.value.command === 'compile') {
+          output = compiled.value;
+          report = compiled.value.report;
+        } else if (parsed.value.command === 'analyze') {
+          const analysis = analyzeFactory(model, compiled.value.plan);
+          output = { ...compiled.value, analysis };
+          report = withAnalysisSection(compiled.value.report, analysis);
+        } else {
+          const explained = parsed.value.orderId
+            ? explainOrderDelay(model, compiled.value.plan, parsed.value.orderId)
+            : explainFactoryDelays(model, compiled.value.plan);
+          if (!explained.ok) throw new Error(formatDiagnostics(explained.diagnostics));
+          output = { plan: { name: compiled.value.plan.name, digest: compiled.value.plan.digest }, explanation: explained.value };
+        }
       }
+      const text =
+        parsed.value.format === 'json'
+          ? formatCliResult(output, parsed.value.pretty)
+          : formatPlanReport(report, parsed.value.format, parsed.value.pretty);
+      if (parsed.value.outputPath) await writeFile(parsed.value.outputPath, text, 'utf8');
+      else process.stdout.write(text);
+    } catch (error) {
+      process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
+      process.exitCode = 1;
     }
-    const text =
-      parsed.value.format === 'json'
-        ? formatCliResult(output, parsed.value.pretty)
-        : formatPlanReport(report, parsed.value.format, parsed.value.pretty);
-    if (parsed.value.outputPath) await writeFile(parsed.value.outputPath, text, 'utf8');
-    else process.stdout.write(text);
-  } catch (error) {
-    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
-    process.exitCode = 1;
   }
 }

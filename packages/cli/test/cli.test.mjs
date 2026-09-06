@@ -1,6 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CLI_HELP, formatDiagnostics, formatPlanReport, parseCliArguments, withAnalysisSection } from '../dist/index.js';
+import {
+  CLI_HELP,
+  formatDiagnostics,
+  formatPlanReport,
+  inputFileDiagnostic,
+  parseCliArguments,
+  withAnalysisSection,
+} from '../dist/index.js';
 
 test('CLI parser accepts compile options', () => {
   const result = parseCliArguments(['compile', 'factory.json', '--dispatch', 'priority', '--compact']);
@@ -147,4 +154,51 @@ test('CLI parser rejects an invalid candidate rule', () => {
   const result = parseCliArguments(['compare', 'factory.json', '--against', 'longest-first']);
   assert.equal(result.ok, false);
   assert.match(formatDiagnostics(result.diagnostics), /--against has an invalid rule/);
+});
+
+test('CLI parser accepts --strict-materials on planning commands', () => {
+  for (const command of ['compile', 'analyze', 'explain']) {
+    const result = parseCliArguments([command, 'factory.json', '--strict-materials']);
+    assert.equal(result.ok, true);
+    assert.equal(result.value.strictMaterials, true);
+  }
+});
+
+test('CLI parser omits strictMaterials when the flag is absent', () => {
+  const result = parseCliArguments(['compile', 'factory.json']);
+  assert.equal(result.ok, true);
+  assert.equal('strictMaterials' in result.value, false);
+});
+
+test('CLI parser rejects --strict-materials where no plan is compiled', () => {
+  for (const command of ['validate', 'compare']) {
+    const argv = command === 'compare' ? [command, 'factory.json', '--against', 'priority'] : [command, 'factory.json'];
+    const result = parseCliArguments([...argv, '--strict-materials']);
+    assert.equal(result.ok, false);
+    assert.match(formatDiagnostics(result.diagnostics), /--strict-materials is only valid for compile, analyze, and explain/);
+  }
+});
+
+test('CLI reports an unreadable input path as a diagnostic', () => {
+  const diagnostic = inputFileDiagnostic('factory.json', Object.assign(new Error('ENOENT: no such file'), { code: 'ENOENT' }));
+  assert.equal(diagnostic.code, 'CLI_INPUT_READ');
+  assert.equal(diagnostic.path, 'factory.json');
+  assert.match(formatDiagnostics([diagnostic]), /CLI_INPUT_READ: input cannot be read: .*\[factory\.json\]/);
+});
+
+test('CLI reports malformed JSON separately from an unreadable file', () => {
+  let thrown;
+  try {
+    JSON.parse('{');
+  } catch (error) {
+    thrown = error;
+  }
+  const diagnostic = inputFileDiagnostic('factory.json', thrown);
+  assert.equal(diagnostic.code, 'CLI_INPUT_JSON');
+  assert.match(diagnostic.message, /^input is not valid JSON: /);
+});
+
+test('CLI help documents material handling and exit codes', () => {
+  assert.match(CLI_HELP, /--strict-materials/);
+  assert.match(CLI_HELP, /Exit codes:/);
 });

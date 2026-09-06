@@ -140,6 +140,16 @@ node bin/planforge.mjs compile examples/factory.json --format csv
 node bin/planforge.mjs analyze examples/factory.json --format markdown
 ```
 
+Fail the command instead of listing shortages when planned production would
+exhaust on-hand material:
+
+```bash
+node bin/planforge.mjs compile examples/factory.json --strict-materials
+```
+
+The CLI exits 0 on success, 1 when the model is rejected while planning, and 2
+when the arguments or the input file cannot be used.
+
 Print usage or the installed version at any time:
 
 ```bash

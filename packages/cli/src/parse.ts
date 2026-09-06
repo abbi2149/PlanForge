@@ -5,6 +5,7 @@ const commands = new Set(['validate', 'compile', 'analyze', 'explain', 'compare'
 const rules = new Set(['priority', 'earliest-due', 'shortest-processing', 'critical-ratio']);
 const formats = new Set(['json', 'csv', 'markdown']);
 const reportCommands = new Set(['compile', 'analyze']);
+const materialCommands = new Set(['compile', 'analyze', 'explain']);
 const helpAliases = new Set(['help', '--help', '-h']);
 const versionAliases = new Set(['version', '--version', '-v']);
 
@@ -23,6 +24,7 @@ export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptio
   let orderId: string | undefined;
   let dispatchRule: DispatchRuleName | undefined;
   let againstRule: DispatchRuleName | undefined;
+  let strictMaterials = false;
   let format: CliFormat = 'json';
   let pretty = true;
   for (let index = 0; index < args.length; index += 1) {
@@ -44,6 +46,8 @@ export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptio
     } else if (arg === '--order') {
       orderId = args[++index];
       if (!orderId) return failure({ code: 'CLI_ARGUMENT', message: '--order requires an order id' });
+    } else if (arg === '--strict-materials') {
+      strictMaterials = true;
     } else if (arg === '--compact') {
       pretty = false;
     } else if (arg.startsWith('-')) {
@@ -62,6 +66,9 @@ export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptio
   if (againstRule !== undefined && command !== 'compare') {
     return failure({ code: 'CLI_ARGUMENT', message: '--against is only valid for compare' });
   }
+  if (strictMaterials && !materialCommands.has(command)) {
+    return failure({ code: 'CLI_ARGUMENT', message: '--strict-materials is only valid for compile, analyze, and explain' });
+  }
   if (command === 'compare' && againstRule === undefined) {
     return failure({ code: 'CLI_ARGUMENT', message: 'compare requires --against <rule>' });
   }
@@ -77,5 +84,6 @@ export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptio
     ...(dispatchRule === undefined ? {} : { dispatchRule }),
     ...(againstRule === undefined ? {} : { againstRule }),
     ...(orderId === undefined ? {} : { orderId }),
+    ...(strictMaterials ? { strictMaterials } : {}),
   });
 }

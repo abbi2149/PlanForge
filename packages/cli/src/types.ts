@@ -12,6 +12,8 @@ export interface CliRunOptions {
   readonly dispatchRule?: DispatchRuleName;
   /** Candidate rule that `compare` measures against the baseline rule. */
   readonly againstRule?: DispatchRuleName;
+  /** Fails the command when planned production would exhaust on-hand material. */
+  readonly strictMaterials?: boolean;
   /** Restricts `explain` to a single order id. */
   readonly orderId?: string;
   readonly format: CliFormat;

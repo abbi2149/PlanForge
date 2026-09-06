@@ -44,3 +44,15 @@ export function withAnalysisSection(report: ProductionReport, analysis: FactoryA
     ],
   };
 }
+
+/**
+ * Turns a failed read or parse of the input document into a diagnostic, so an
+ * unreadable path or malformed JSON is reported like every other CLI failure
+ * instead of as a bare runtime error.
+ */
+export function inputFileDiagnostic(inputPath: string, error: unknown): Diagnostic {
+  const detail = error instanceof Error ? error.message : String(error);
+  return error instanceof SyntaxError
+    ? { code: 'CLI_INPUT_JSON', message: `input is not valid JSON: ${detail}`, path: inputPath }
+    : { code: 'CLI_INPUT_READ', message: `input cannot be read: ${detail}`, path: inputPath };
+}
