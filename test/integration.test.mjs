@@ -98,3 +98,15 @@ test('CLI explain reports an unknown order as a diagnostic', async () => {
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('CLI prints help without reading a factory document', async () => {
+  const { stdout } = await exec(process.execPath, ['bin/planforge.mjs', '--help'], { cwd: process.cwd() });
+  assert.match(stdout, /^PlanForge/);
+  assert.match(stdout, /planforge compile <factory\.json>/);
+});
+
+test('CLI prints the workspace version', async () => {
+  const manifest = JSON.parse(await readFile('package.json', 'utf8'));
+  const { stdout } = await exec(process.execPath, ['bin/planforge.mjs', '--version'], { cwd: process.cwd() });
+  assert.equal(stdout, `planforge ${manifest.version}\n`);
+});

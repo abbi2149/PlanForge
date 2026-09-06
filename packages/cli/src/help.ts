@@ -5,6 +5,12 @@ Usage:
   planforge compile <factory.json> [--dispatch <rule>] [--output <file>] [--compact]
   planforge analyze <factory.json> [--dispatch <rule>] [--output <file>] [--compact]
   planforge explain <factory.json> [--order <id>] [--dispatch <rule>] [--output <file>] [--compact]
+  planforge help
+  planforge version
+
+Global options:
+  --help, -h            print this help and exit
+  --version, -v         print the PlanForge version and exit
 
 Dispatch rules:
   priority

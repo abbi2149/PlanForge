@@ -9,10 +9,19 @@ import {
 } from '../packages/api/dist/index.js';
 import { CLI_HELP, formatCliResult, formatDiagnostics, parseCliArguments } from '../packages/cli/dist/index.js';
 
+async function planforgeVersion() {
+  const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+  return manifest.version;
+}
+
 const parsed = parseCliArguments(process.argv.slice(2));
 if (!parsed.ok) {
   process.stderr.write(`${formatDiagnostics(parsed.diagnostics)}\n\n${CLI_HELP}`);
   process.exitCode = 2;
+} else if (parsed.value.command === 'help') {
+  process.stdout.write(CLI_HELP);
+} else if (parsed.value.command === 'version') {
+  process.stdout.write(`planforge ${await planforgeVersion()}\n`);
 } else {
   try {
     const model = JSON.parse(await readFile(parsed.value.inputPath, 'utf8'));

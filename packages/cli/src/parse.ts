@@ -1,21 +1,25 @@
 import { failure, success, type ModelResult } from '@planforge/api';
-import type { CliOptions } from './types.js';
+import type { CliOptions, CliRunOptions } from './types.js';
 
 const commands = new Set(['validate', 'compile', 'analyze', 'explain']);
 const rules = new Set(['priority', 'earliest-due', 'shortest-processing', 'critical-ratio']);
+const helpAliases = new Set(['help', '--help', '-h']);
+const versionAliases = new Set(['version', '--version', '-v']);
 
 export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptions> {
+  if (argv.some((arg) => helpAliases.has(arg))) return success({ command: 'help' });
+  if (argv.some((arg) => versionAliases.has(arg))) return success({ command: 'version' });
   const [commandRaw, ...args] = argv;
   if (!commandRaw || !commands.has(commandRaw)) {
     return failure({
       code: 'CLI_COMMAND',
-      message: 'command must be validate, compile, analyze, or explain',
+      message: 'command must be validate, compile, analyze, explain, help, or version',
     });
   }
   let inputPath = '';
   let outputPath: string | undefined;
   let orderId: string | undefined;
-  let dispatchRule: CliOptions['dispatchRule'];
+  let dispatchRule: CliRunOptions['dispatchRule'];
   let pretty = true;
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index]!;
@@ -25,7 +29,7 @@ export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptio
     } else if (arg === '--dispatch') {
       const value = args[++index];
       if (!value || !rules.has(value)) return failure({ code: 'CLI_ARGUMENT', message: '--dispatch has an invalid rule' });
-      dispatchRule = value as CliOptions['dispatchRule'];
+      dispatchRule = value as CliRunOptions['dispatchRule'];
     } else if (arg === '--order') {
       orderId = args[++index];
       if (!orderId) return failure({ code: 'CLI_ARGUMENT', message: '--order requires an order id' });
@@ -40,7 +44,7 @@ export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptio
     }
   }
   if (inputPath.length === 0) return failure({ code: 'CLI_INPUT', message: 'an input JSON path is required' });
-  const command = commandRaw as CliOptions['command'];
+  const command = commandRaw as CliRunOptions['command'];
   if (orderId !== undefined && command !== 'explain') {
     return failure({ code: 'CLI_ARGUMENT', message: '--order is only valid for explain' });
   }

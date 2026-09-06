@@ -42,3 +42,32 @@ test('CLI help documents every command', () => {
     assert.match(CLI_HELP, new RegExp(`planforge ${command} `));
   }
 });
+
+test('CLI parser resolves help aliases before any other argument', () => {
+  for (const argv of [['help'], ['--help'], ['-h'], ['compile', 'factory.json', '--help']]) {
+    const result = parseCliArguments(argv);
+    assert.equal(result.ok, true);
+    assert.deepEqual(result.value, { command: 'help' });
+  }
+});
+
+test('CLI parser resolves version aliases', () => {
+  for (const argv of [['version'], ['--version'], ['-v']]) {
+    const result = parseCliArguments(argv);
+    assert.equal(result.ok, true);
+    assert.deepEqual(result.value, { command: 'version' });
+  }
+});
+
+test('CLI parser still rejects an unknown command', () => {
+  const result = parseCliArguments(['deploy', 'factory.json']);
+  assert.equal(result.ok, false);
+  assert.match(formatDiagnostics(result.diagnostics), /CLI_COMMAND/);
+});
+
+test('CLI help documents the help and version commands', () => {
+  for (const command of ['help', 'version']) {
+    assert.match(CLI_HELP, new RegExp(`planforge ${command}`));
+  }
+  assert.match(CLI_HELP, /--version, -v/);
+});
