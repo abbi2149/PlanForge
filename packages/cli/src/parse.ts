@@ -1,7 +1,7 @@
 import { failure, success, type ModelResult } from '@planforge/api';
-import type { CliFormat, CliOptions, CliRunOptions } from './types.js';
+import type { CliFormat, CliOptions, CliRunOptions, DispatchRuleName } from './types.js';
 
-const commands = new Set(['validate', 'compile', 'analyze', 'explain']);
+const commands = new Set(['validate', 'compile', 'analyze', 'explain', 'compare']);
 const rules = new Set(['priority', 'earliest-due', 'shortest-processing', 'critical-ratio']);
 const formats = new Set(['json', 'csv', 'markdown']);
 const reportCommands = new Set(['compile', 'analyze']);
@@ -15,13 +15,14 @@ export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptio
   if (!commandRaw || !commands.has(commandRaw)) {
     return failure({
       code: 'CLI_COMMAND',
-      message: 'command must be validate, compile, analyze, explain, help, or version',
+      message: 'command must be validate, compile, analyze, explain, compare, help, or version',
     });
   }
   let inputPath = '';
   let outputPath: string | undefined;
   let orderId: string | undefined;
-  let dispatchRule: CliRunOptions['dispatchRule'];
+  let dispatchRule: DispatchRuleName | undefined;
+  let againstRule: DispatchRuleName | undefined;
   let format: CliFormat = 'json';
   let pretty = true;
   for (let index = 0; index < args.length; index += 1) {
@@ -29,10 +30,11 @@ export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptio
     if (arg === '--output') {
       outputPath = args[++index];
       if (!outputPath) return failure({ code: 'CLI_ARGUMENT', message: '--output requires a path' });
-    } else if (arg === '--dispatch') {
+    } else if (arg === '--dispatch' || arg === '--against') {
       const value = args[++index];
-      if (!value || !rules.has(value)) return failure({ code: 'CLI_ARGUMENT', message: '--dispatch has an invalid rule' });
-      dispatchRule = value as CliRunOptions['dispatchRule'];
+      if (!value || !rules.has(value)) return failure({ code: 'CLI_ARGUMENT', message: `${arg} has an invalid rule` });
+      if (arg === '--dispatch') dispatchRule = value as DispatchRuleName;
+      else againstRule = value as DispatchRuleName;
     } else if (arg === '--format') {
       const value = args[++index];
       if (!value || !formats.has(value)) {
@@ -57,6 +59,12 @@ export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptio
   if (orderId !== undefined && command !== 'explain') {
     return failure({ code: 'CLI_ARGUMENT', message: '--order is only valid for explain' });
   }
+  if (againstRule !== undefined && command !== 'compare') {
+    return failure({ code: 'CLI_ARGUMENT', message: '--against is only valid for compare' });
+  }
+  if (command === 'compare' && againstRule === undefined) {
+    return failure({ code: 'CLI_ARGUMENT', message: 'compare requires --against <rule>' });
+  }
   if (format !== 'json' && !reportCommands.has(command)) {
     return failure({ code: 'CLI_ARGUMENT', message: `--format ${format} is only valid for compile and analyze` });
   }
@@ -67,6 +75,7 @@ export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptio
     pretty,
     ...(outputPath === undefined ? {} : { outputPath }),
     ...(dispatchRule === undefined ? {} : { dispatchRule }),
+    ...(againstRule === undefined ? {} : { againstRule }),
     ...(orderId === undefined ? {} : { orderId }),
   });
 }

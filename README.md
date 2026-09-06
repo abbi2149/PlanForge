@@ -125,6 +125,12 @@ Or trace a single order:
 node bin/planforge.mjs explain examples/factory.json --order ORD-2
 ```
 
+Compare two dispatch rules on the same model:
+
+```bash
+node bin/planforge.mjs compare examples/factory.json --against earliest-due
+```
+
 Use `--compact` for single-line JSON and `--output <file>` to write the result to disk.
 
 Render the plan report as CSV or Markdown instead of JSON:

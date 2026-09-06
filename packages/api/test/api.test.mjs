@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   analyzeFactory,
+  compareFactoryDispatchRules,
   compileFactory,
   compileFactoryPortfolio,
   explainFactoryDelays,
@@ -53,4 +54,33 @@ test('compiled plans explain where each order flow time went', () => {
   assert.equal(single.ok, true);
   assert.equal(single.value.minutesByCause['resource-contention'], 22);
   assert.deepEqual(summary.value.blockingOrders[0].blockedOrders, ['ORD-2']);
+});
+
+test('dispatch rules can be compared on one factory model', () => {
+  const fixture = factoryFixture();
+  const result = compareFactoryDispatchRules(fixture, 'priority', 'earliest-due');
+  assert.equal(result.ok, true);
+  const { baseline, candidate, plan, makespanDelta, onTimeBasisPointsDelta } = result.value;
+  assert.equal(baseline.rule, 'priority');
+  assert.equal(candidate.rule, 'earliest-due');
+  assert.equal(plan.baselineDigest, baseline.digest);
+  assert.equal(plan.candidateDigest, candidate.digest);
+  assert.equal(makespanDelta, candidate.metrics.makespan - baseline.metrics.makespan);
+  assert.equal(onTimeBasisPointsDelta, candidate.metrics.onTimeBasisPoints - baseline.metrics.onTimeBasisPoints);
+  assert.equal(plan.stability.comparedOperations, baseline.metrics.completedOrders * 2);
+});
+
+test('comparing a rule against itself reports an identical plan', () => {
+  const result = compareFactoryDispatchRules(factoryFixture(), 'priority', 'priority');
+  assert.equal(result.ok, true);
+  assert.equal(result.value.plan.baselineDigest, result.value.plan.candidateDigest);
+  assert.equal(result.value.plan.stability.movedOperations, 0);
+  assert.equal(result.value.makespanDelta, 0);
+});
+
+test('comparing dispatch rules surfaces model diagnostics', () => {
+  const fixture = factoryFixture();
+  const result = compareFactoryDispatchRules({ ...fixture, name: '' }, 'priority', 'earliest-due');
+  assert.equal(result.ok, false);
+  assert.equal(result.diagnostics[0].code, 'API_FACTORY_NAME');
 });

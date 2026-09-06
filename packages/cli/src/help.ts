@@ -5,6 +5,7 @@ Usage:
   planforge compile <factory.json> [--dispatch <rule>] [--format <format>] [--output <file>] [--compact]
   planforge analyze <factory.json> [--dispatch <rule>] [--format <format>] [--output <file>] [--compact]
   planforge explain <factory.json> [--order <id>] [--dispatch <rule>] [--output <file>] [--compact]
+  planforge compare <factory.json> --against <rule> [--dispatch <rule>] [--output <file>] [--compact]
   planforge help
   planforge version
 
@@ -22,6 +23,10 @@ Output formats (compile and analyze only, default json):
   json                  the full command result
   csv                   the plan report as one CSV document
   markdown              the plan report as a Markdown document
+
+Compare compiles the model twice and reports how the --against rule moves
+makespan, tardiness, on-time delivery, and schedule stability against the
+--dispatch baseline, which defaults to priority.
 
 Explain attributes every minute of an order's flow time to one of:
   processing            work running on the critical chain

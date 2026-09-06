@@ -163,3 +163,35 @@ test('CLI rejects a report format for explain', async () => {
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('CLI compare reports how a candidate dispatch rule moves the plan', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'planforge-test-'));
+  try {
+    const input = path.join(root, 'factory.json');
+    await writeFile(input, JSON.stringify(factoryFixture()), 'utf8');
+    const { stdout } = await exec(
+      process.execPath,
+      ['bin/planforge.mjs', 'compare', input, '--against', 'earliest-due', '--compact'],
+      { cwd: process.cwd() },
+    );
+    const { comparison } = JSON.parse(stdout);
+    assert.equal(comparison.baseline.rule, 'priority');
+    assert.equal(comparison.candidate.rule, 'earliest-due');
+    assert.match(comparison.candidate.digest, /^[0-9a-f]{64}$/);
+    assert.equal(typeof comparison.makespanDelta, 'number');
+    assert.ok(comparison.plan.stability.comparedOperations > 0);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('CLI compare without --against exits with a usage diagnostic', async () => {
+  await assert.rejects(
+    exec(process.execPath, ['bin/planforge.mjs', 'compare', 'factory.json'], { cwd: process.cwd() }),
+    (error) => {
+      assert.equal(error.code, 2);
+      assert.match(error.stderr, /compare requires --against <rule>/);
+      return true;
+    },
+  );
+});

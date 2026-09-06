@@ -1,4 +1,6 @@
-export type CliCommand = 'validate' | 'compile' | 'analyze' | 'explain';
+export type CliCommand = 'validate' | 'compile' | 'analyze' | 'explain' | 'compare';
+
+export type DispatchRuleName = 'priority' | 'earliest-due' | 'shortest-processing' | 'critical-ratio';
 
 /** Rendering of the command result. `csv` and `markdown` need a plan report. */
 export type CliFormat = 'json' | 'csv' | 'markdown';
@@ -7,7 +9,9 @@ export interface CliRunOptions {
   readonly command: CliCommand;
   readonly inputPath: string;
   readonly outputPath?: string;
-  readonly dispatchRule?: 'priority' | 'earliest-due' | 'shortest-processing' | 'critical-ratio';
+  readonly dispatchRule?: DispatchRuleName;
+  /** Candidate rule that `compare` measures against the baseline rule. */
+  readonly againstRule?: DispatchRuleName;
   /** Restricts `explain` to a single order id. */
   readonly orderId?: string;
   readonly format: CliFormat;

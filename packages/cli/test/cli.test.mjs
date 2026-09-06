@@ -119,3 +119,32 @@ test('CLI analysis section carries schedule metrics into report output', () => {
   assert.equal(section.title, 'Analysis');
   assert.deepEqual(section.rows, [{ makespan: 120, completedOrders: 2, bottlenecks: 'WC-1 WC-2', maintenanceConflicts: 0 }]);
 });
+
+test('CLI parser accepts compare with a candidate rule', () => {
+  const result = parseCliArguments(['compare', 'factory.json', '--dispatch', 'priority', '--against', 'earliest-due']);
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.value, {
+    command: 'compare',
+    inputPath: 'factory.json',
+    dispatchRule: 'priority',
+    againstRule: 'earliest-due',
+    format: 'json',
+    pretty: true,
+  });
+});
+
+test('CLI parser requires --against for compare and rejects it elsewhere', () => {
+  const missing = parseCliArguments(['compare', 'factory.json']);
+  assert.equal(missing.ok, false);
+  assert.match(formatDiagnostics(missing.diagnostics), /compare requires --against <rule>/);
+
+  const misplaced = parseCliArguments(['compile', 'factory.json', '--against', 'priority']);
+  assert.equal(misplaced.ok, false);
+  assert.match(formatDiagnostics(misplaced.diagnostics), /--against is only valid for compare/);
+});
+
+test('CLI parser rejects an invalid candidate rule', () => {
+  const result = parseCliArguments(['compare', 'factory.json', '--against', 'longest-first']);
+  assert.equal(result.ok, false);
+  assert.match(formatDiagnostics(result.diagnostics), /--against has an invalid rule/);
+});

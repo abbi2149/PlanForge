@@ -2,6 +2,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import {
   analyzeFactory,
+  compareFactoryDispatchRules,
   compileFactory,
   explainFactoryDelays,
   explainOrderDelay,
@@ -38,6 +39,14 @@ if (!parsed.ok) {
       const result = validateFactoryModel(model);
       if (!result.ok) throw new Error(formatDiagnostics(result.diagnostics));
       output = { ok: true, name: result.value.name };
+    } else if (parsed.value.command === 'compare') {
+      const compared = compareFactoryDispatchRules(
+        model,
+        parsed.value.dispatchRule ?? 'priority',
+        parsed.value.againstRule,
+      );
+      if (!compared.ok) throw new Error(formatDiagnostics(compared.diagnostics));
+      output = { comparison: compared.value };
     } else {
       const compiled = compileFactory(model, {
         ...(parsed.value.dispatchRule ? { dispatchRule: parsed.value.dispatchRule } : {}),
