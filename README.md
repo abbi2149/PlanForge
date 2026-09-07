@@ -131,6 +131,12 @@ Compare two dispatch rules on the same model:
 node bin/planforge.mjs compare examples/factory.json --against earliest-due
 ```
 
+Or score every dispatch rule at once and see which one wins:
+
+```bash
+node bin/planforge.mjs rank examples/factory.json
+```
+
 Use `--compact` for single-line JSON and `--output <file>` to write the result to disk.
 
 Render the plan report as CSV or Markdown instead of JSON:

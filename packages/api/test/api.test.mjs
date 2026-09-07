@@ -7,6 +7,7 @@ import {
   compileFactoryPortfolio,
   explainFactoryDelays,
   explainOrderDelay,
+  rankFactoryDispatchRules,
   validateFactoryModel,
 } from '../dist/index.js';
 import { factoryFixture } from '../../../test/fixtures.mjs';
@@ -83,4 +84,48 @@ test('comparing dispatch rules surfaces model diagnostics', () => {
   const result = compareFactoryDispatchRules({ ...fixture, name: '' }, 'priority', 'earliest-due');
   assert.equal(result.ok, false);
   assert.equal(result.diagnostics[0].code, 'API_FACTORY_NAME');
+});
+
+test('every dispatch rule is ranked best-first on one factory model', () => {
+  const result = rankFactoryDispatchRules(factoryFixture());
+  assert.equal(result.ok, true);
+  const { entries, best } = result.value;
+  assert.deepEqual(
+    [...entries].map((entry) => entry.rule).sort(),
+    ['critical-ratio', 'earliest-due', 'priority', 'shortest-processing'],
+  );
+  assert.deepEqual(entries.map((entry) => entry.rank), [1, 2, 3, 4]);
+  assert.equal(best, entries[0].rule);
+  for (const entry of entries) {
+    assert.match(entry.digest, /^[0-9a-f]{64}$/);
+    assert.equal(entry.metrics.completedOrders, 2);
+    assert.equal('plan' in entry, false);
+  }
+  for (let index = 1; index < entries.length; index += 1) {
+    const previous = entries[index - 1];
+    const current = entries[index];
+    assert.ok(previous.metrics.onTimeBasisPoints >= current.metrics.onTimeBasisPoints);
+    if (previous.metrics.onTimeBasisPoints === current.metrics.onTimeBasisPoints) {
+      assert.ok(previous.metrics.averageTardinessMinutes <= current.metrics.averageTardinessMinutes);
+    }
+  }
+});
+
+test('ranking dispatch rules is deterministic and accepts a subset', () => {
+  const fixture = factoryFixture();
+  assert.deepEqual(rankFactoryDispatchRules(fixture).value, rankFactoryDispatchRules(fixture).value);
+
+  const subset = rankFactoryDispatchRules(fixture, ['earliest-due', 'priority', 'earliest-due']);
+  assert.equal(subset.ok, true);
+  assert.deepEqual([...subset.value.entries].map((entry) => entry.rule).sort(), ['earliest-due', 'priority']);
+});
+
+test('ranking rejects an empty rule set and surfaces model diagnostics', () => {
+  const empty = rankFactoryDispatchRules(factoryFixture(), []);
+  assert.equal(empty.ok, false);
+  assert.equal(empty.diagnostics[0].code, 'API_DISPATCH_RULES');
+
+  const invalid = rankFactoryDispatchRules({ ...factoryFixture(), name: '' });
+  assert.equal(invalid.ok, false);
+  assert.equal(invalid.diagnostics[0].code, 'API_FACTORY_NAME');
 });

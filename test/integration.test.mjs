@@ -272,3 +272,33 @@ test('CLI reports malformed input JSON with the offending path', async () => {
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('CLI rank scores every dispatch rule in one pass', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'planforge-test-'));
+  try {
+    const input = path.join(root, 'factory.json');
+    await writeFile(input, JSON.stringify(factoryFixture()), 'utf8');
+    const { stdout } = await exec(process.execPath, ['bin/planforge.mjs', 'rank', input, '--compact'], {
+      cwd: process.cwd(),
+    });
+    const { ranking } = JSON.parse(stdout);
+    assert.equal(ranking.entries.length, 4);
+    assert.deepEqual(ranking.entries.map((entry) => entry.rank), [1, 2, 3, 4]);
+    assert.equal(ranking.best, ranking.entries[0].rule);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('CLI rank rejects a dispatch rule with a usage diagnostic', async () => {
+  await assert.rejects(
+    exec(process.execPath, ['bin/planforge.mjs', 'rank', 'factory.json', '--dispatch', 'priority'], {
+      cwd: process.cwd(),
+    }),
+    (error) => {
+      assert.equal(error.code, 2);
+      assert.match(error.stderr, /--dispatch is not valid for rank/);
+      return true;
+    },
+  );
+});

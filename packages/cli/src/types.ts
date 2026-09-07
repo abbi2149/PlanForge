@@ -1,4 +1,4 @@
-export type CliCommand = 'validate' | 'compile' | 'analyze' | 'explain' | 'compare';
+export type CliCommand = 'validate' | 'compile' | 'analyze' | 'explain' | 'compare' | 'rank';
 
 export type DispatchRuleName = 'priority' | 'earliest-due' | 'shortest-processing' | 'critical-ratio';
 

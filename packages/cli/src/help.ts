@@ -6,6 +6,7 @@ Usage:
   planforge analyze <factory.json> [--dispatch <rule>] [--format <format>] [--strict-materials] [--output <file>] [--compact]
   planforge explain <factory.json> [--order <id>] [--dispatch <rule>] [--strict-materials] [--output <file>] [--compact]
   planforge compare <factory.json> --against <rule> [--dispatch <rule>] [--output <file>] [--compact]
+  planforge rank <factory.json> [--output <file>] [--compact]
   planforge help
   planforge version
 
@@ -31,6 +32,11 @@ Material handling:
 Compare compiles the model twice and reports how the --against rule moves
 makespan, tardiness, on-time delivery, and schedule stability against the
 --dispatch baseline, which defaults to priority.
+
+Rank compiles the model under every dispatch rule and orders the outcomes
+best-first by on-time delivery, then average tardiness, then makespan, then
+average flow time, then warning count, then rule name. It takes no --dispatch
+because it scores every rule.
 
 Explain attributes every minute of an order's flow time to one of:
   processing            work running on the critical chain

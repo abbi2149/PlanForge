@@ -1,5 +1,11 @@
-import { success, type ModelResult, type ProductionPlan } from '@planforge/model';
-import { comparePlanStability, scheduleMetrics, type DispatchRule, type ScheduleMetrics } from '@planforge/scheduler';
+import { failure, success, type ModelResult, type ProductionPlan } from '@planforge/model';
+import {
+  comparePlanStability,
+  scheduleMetrics,
+  DISPATCH_RULES,
+  type DispatchRule,
+  type ScheduleMetrics,
+} from '@planforge/scheduler';
 import { compileFactory, type CompiledFactory } from './compile.js';
 import type { FactoryModel } from './types.js';
 
@@ -115,4 +121,57 @@ export function compareFactoryDispatchRules(
       candidateOutcome.metrics.averageTardinessMinutes - baselineOutcome.metrics.averageTardinessMinutes,
     onTimeBasisPointsDelta: candidateOutcome.metrics.onTimeBasisPoints - baselineOutcome.metrics.onTimeBasisPoints,
   });
+}
+
+export interface DispatchRuleRankEntry extends DispatchRuleOutcome {
+  /** One-based position in the ranking. Ties are broken by rule name, so no two entries share a rank. */
+  readonly rank: number;
+}
+
+export interface DispatchRuleRanking {
+  readonly entries: readonly DispatchRuleRankEntry[];
+  readonly best: DispatchRule;
+}
+
+/**
+ * Orders two rules best-first: keep the most orders on time, then finish late
+ * orders sooner, then compress the schedule, then leave fewer warnings. The
+ * rule name breaks any remaining tie so the ranking is a total order.
+ */
+function byRankQuality(left: DispatchRuleOutcome, right: DispatchRuleOutcome): number {
+  return (
+    right.metrics.onTimeBasisPoints - left.metrics.onTimeBasisPoints ||
+    left.metrics.averageTardinessMinutes - right.metrics.averageTardinessMinutes ||
+    left.metrics.makespan - right.metrics.makespan ||
+    left.metrics.averageFlowMinutes - right.metrics.averageFlowMinutes ||
+    left.warningCount - right.warningCount ||
+    left.rule.localeCompare(right.rule)
+  );
+}
+
+/**
+ * Compiles one factory under every candidate dispatch rule and ranks the
+ * outcomes best-first, so a model can be sized up in one pass instead of the
+ * pairwise runs `compareFactoryDispatchRules` needs. Material shortages are not
+ * validated because every plan shares one model.
+ */
+export function rankFactoryDispatchRules(
+  model: FactoryModel,
+  rules: readonly DispatchRule[] = DISPATCH_RULES,
+): ModelResult<DispatchRuleRanking> {
+  const candidates = [...new Set(rules)];
+  if (candidates.length === 0) {
+    return failure({ code: 'API_DISPATCH_RULES', message: 'at least one dispatch rule is required' });
+  }
+  const outcomes: DispatchRuleOutcome[] = [];
+  for (const rule of candidates) {
+    const outcome = dispatchRuleOutcome(model, rule);
+    if (!outcome.ok) return outcome;
+    const { plan: _plan, ...withoutPlan } = outcome.value;
+    outcomes.push(withoutPlan);
+  }
+  const entries = outcomes
+    .sort(byRankQuality)
+    .map((outcome, index) => ({ ...outcome, rank: index + 1 }));
+  return success({ entries, best: entries[0]!.rule });
 }

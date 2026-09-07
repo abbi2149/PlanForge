@@ -6,6 +6,7 @@ import {
   compileFactory,
   explainFactoryDelays,
   explainOrderDelay,
+  rankFactoryDispatchRules,
   validateFactoryModel,
 } from '../packages/api/dist/index.js';
 import {
@@ -61,6 +62,10 @@ if (!parsed.ok) {
         );
         if (!compared.ok) throw new Error(formatDiagnostics(compared.diagnostics));
         output = { comparison: compared.value };
+      } else if (parsed.value.command === 'rank') {
+        const ranked = rankFactoryDispatchRules(model);
+        if (!ranked.ok) throw new Error(formatDiagnostics(ranked.diagnostics));
+        output = { ranking: ranked.value };
       } else {
         const compiled = compileFactory(model, {
           ...(parsed.value.dispatchRule ? { dispatchRule: parsed.value.dispatchRule } : {}),

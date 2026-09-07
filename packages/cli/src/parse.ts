@@ -1,8 +1,8 @@
-import { failure, success, type ModelResult } from '@planforge/api';
+import { DISPATCH_RULES, failure, success, type ModelResult } from '@planforge/api';
 import type { CliFormat, CliOptions, CliRunOptions, DispatchRuleName } from './types.js';
 
-const commands = new Set(['validate', 'compile', 'analyze', 'explain', 'compare']);
-const rules = new Set(['priority', 'earliest-due', 'shortest-processing', 'critical-ratio']);
+const commands = new Set(['validate', 'compile', 'analyze', 'explain', 'compare', 'rank']);
+const rules = new Set<string>(DISPATCH_RULES);
 const formats = new Set(['json', 'csv', 'markdown']);
 const reportCommands = new Set(['compile', 'analyze']);
 const materialCommands = new Set(['compile', 'analyze', 'explain']);
@@ -68,6 +68,9 @@ export function parseCliArguments(argv: readonly string[]): ModelResult<CliOptio
   }
   if (strictMaterials && !materialCommands.has(command)) {
     return failure({ code: 'CLI_ARGUMENT', message: '--strict-materials is only valid for compile, analyze, and explain' });
+  }
+  if (dispatchRule !== undefined && command === 'rank') {
+    return failure({ code: 'CLI_ARGUMENT', message: '--dispatch is not valid for rank, which scores every rule' });
   }
   if (command === 'compare' && againstRule === undefined) {
     return failure({ code: 'CLI_ARGUMENT', message: 'compare requires --against <rule>' });

@@ -202,3 +202,26 @@ test('CLI help documents material handling and exit codes', () => {
   assert.match(CLI_HELP, /--strict-materials/);
   assert.match(CLI_HELP, /Exit codes:/);
 });
+
+test('CLI parser accepts rank without a dispatch rule', () => {
+  const result = parseCliArguments(['rank', 'factory.json', '--compact']);
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.value, { command: 'rank', inputPath: 'factory.json', format: 'json', pretty: false });
+});
+
+test('CLI parser rejects --dispatch on rank', () => {
+  const result = parseCliArguments(['rank', 'factory.json', '--dispatch', 'priority']);
+  assert.equal(result.ok, false);
+  assert.match(formatDiagnostics(result.diagnostics), /--dispatch is not valid for rank/);
+});
+
+test('CLI parser keeps report formats away from rank', () => {
+  const result = parseCliArguments(['rank', 'factory.json', '--format', 'markdown']);
+  assert.equal(result.ok, false);
+  assert.match(formatDiagnostics(result.diagnostics), /only valid for compile and analyze/);
+});
+
+test('CLI help documents the rank command', () => {
+  assert.match(CLI_HELP, /planforge rank <factory\.json>/);
+  assert.match(CLI_HELP, /Rank compiles the model under every dispatch rule/);
+});

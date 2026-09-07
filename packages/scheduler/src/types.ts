@@ -2,7 +2,10 @@ import type { CapacityLedger } from '@planforge/capacity';
 import type { WorkCalendar } from '@planforge/calendar';
 import type { DemandOrder, Minute, ProductionPlan, Routing, ScheduledOperation } from '@planforge/model';
 
-export type DispatchRule = 'priority' | 'earliest-due' | 'shortest-processing' | 'critical-ratio';
+/** Every dispatch rule the scheduler can apply, in stable documentation order. */
+export const DISPATCH_RULES = ['priority', 'earliest-due', 'shortest-processing', 'critical-ratio'] as const;
+
+export type DispatchRule = (typeof DISPATCH_RULES)[number];
 
 export interface ScheduleInput {
   readonly name: string;
